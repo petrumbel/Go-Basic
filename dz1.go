@@ -2,29 +2,43 @@ package main
 
 import "fmt"
 
+const USDtoEUR = 0.92
+const USDtoRUB = 84.87
+const EURtoRUB = (1 / USDtoEUR) * USDtoRUB
+const EURtoUSD = 1 / USDtoEUR
+const RUBtoEUR = 1 / EURtoRUB
+const RUBtoUSD = 1 / USDtoRUB
+
 func main() {
-	const USDtoEUR = 0.92
-	const USDtoRUB = 84.87
-	const EURtoRUB = (1 / USDtoEUR) * USDtoRUB
-	fmt.Printf("Конвертация 1 USD в EUR = %v\n", USDtoEUR)
-	fmt.Printf("Конвертация 1 USD в RUB = %v\n", USDtoRUB)
-	fmt.Printf("Конвертация 1 EUR в RUB = %v\n", EURtoRUB)
-	firstCurr, secondCurr, number := inputNumbers()
-	calculation(firstCurr, secondCurr, number)
+	fmt.Printf("Конвертация 1 USD в EUR = %0.3f\n", USDtoEUR)
+	fmt.Printf("Конвертация 1 USD в RUB = %0.3f\n", USDtoRUB)
+	fmt.Printf("Конвертация 1 EUR в RUB = %0.3f\n", EURtoRUB)
+	fmt.Printf("Конвертация 1 EUR в USD = %0.3f\n", EURtoUSD)
+	fmt.Printf("Конвертация 1 RUB в EUR = %0.3f\n", RUBtoEUR)
+	fmt.Printf("Конвертация 1 RUB в USD = %0.3f\n", RUBtoUSD)
+	number, firstCurr, secondCurr := inputNumbers()
+	ansver := calculation(number, firstCurr, secondCurr)
+	fmt.Printf("%0.3f", ansver)
 }
 
-//почему в первые ковычки нельзя написать firstCurr и тд.
-func inputNumbers() (float64, float64, float64) {
-	var firstCurr float64
-	var secondCurr float64
+func inputNumbers() (float64, string, string) {
 	var number float64
+	var firstCurr string
+	var secondCurr string
+	fmt.Scan(&number)
 	fmt.Scan(&firstCurr)
 	fmt.Scan(&secondCurr)
-	fmt.Scan(&number)
-	return firstCurr, secondCurr, number
+	return number, firstCurr, secondCurr
 }
 
-func calculation(firstCurr, secondCurr, number float64) {
+func calculation(number float64, firstCurr string, secondCurr string) float64 {
+	var ansver float64
+	if firstCurr == "RUB" && secondCurr == "USD" {
+		ansver = number * RUBtoUSD
+	} else {
+		fmt.Print("ничего не вышло")
+	}
+	return ansver
 
 }
 
