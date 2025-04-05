@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -12,20 +13,28 @@ const RUBtoEUR = 1 / EURtoRUB
 const RUBtoUSD = 1 / USDtoRUB
 
 func main() {
-	fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-	fmt.Println("|      __Калькулятор валют__          |")
-	fmt.Printf("|Конвертация 1 USD в EUR = %0.3f      |\n", USDtoEUR)
-	fmt.Printf("|Конвертация 1 USD в RUB = %0.3f     |\n", USDtoRUB)
-	fmt.Printf("|Конвертация 1 EUR в RUB = %0.3f     |\n", EURtoRUB)
-	fmt.Printf("|Конвертация 1 EUR в USD = %0.3f      |\n", EURtoUSD)
-	fmt.Printf("|Конвертация 1 RUB в EUR = %0.3f      |\n", RUBtoEUR)
-	fmt.Printf("|Конвертация 1 RUB в USD = %0.3f      |\n", RUBtoUSD)
-
-	number, firstCurr, secondCurr := inputNumbers()
-	ansver := calculation(number, firstCurr, secondCurr)
-	fmt.Printf("|     Ваш перевод:%0.3f\n", ansver)
-	fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-
+	for {
+		fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+		fmt.Println("|      __Калькулятор валют__          |")
+		fmt.Printf("|Конвертация 1 USD в EUR = %0.3f      |\n", USDtoEUR)
+		fmt.Printf("|Конвертация 1 USD в RUB = %0.3f     |\n", USDtoRUB)
+		fmt.Printf("|Конвертация 1 EUR в RUB = %0.3f     |\n", EURtoRUB)
+		fmt.Printf("|Конвертация 1 EUR в USD = %0.3f      |\n", EURtoUSD)
+		fmt.Printf("|Конвертация 1 RUB в EUR = %0.3f      |\n", RUBtoEUR)
+		fmt.Printf("|Конвертация 1 RUB в USD = %0.3f      |\n", RUBtoUSD)
+		number, firstCurr, secondCurr := inputNumbers()
+		ansver, err := calculationCurr(number, firstCurr, secondCurr)
+		if err != nil {
+			fmt.Println(errors.New("|Ошибка, введите правильные значения  |"))
+		} else {
+			fmt.Printf("|       Ваш перевод:%0.3f\n", ansver)
+		}
+		checkRepeate := yesOrNot()
+		if !checkRepeate {
+			break
+		}
+		fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+	}
 }
 
 func inputNumbers() (float64, string, string) {
@@ -47,23 +56,36 @@ func inputNumbers() (float64, string, string) {
 	return number, firstCurr, secondCurr
 }
 
-func calculation(number float64, firstCurr string, secondCurr string) float64 {
-	var ansver float64
-	if firstCurr == "RUB" || firstCurr == "rub" && secondCurr == "USD" || secondCurr == "usd" {
-		ansver = number * RUBtoUSD
-	} else if firstCurr == "RUB" || firstCurr == "rub" && secondCurr == "EUR" || secondCurr == "eur" {
-		ansver = number * RUBtoEUR
-	} else if firstCurr == "USD" || firstCurr == "usd" && secondCurr == "RUB" || secondCurr == "rub" {
-		ansver = number * USDtoRUB
-	} else if firstCurr == "USD" || firstCurr == "usd" && secondCurr == "EUR" || secondCurr == "eur" {
-		ansver = number * USDtoEUR
-	} else if firstCurr == "EUR" || firstCurr == "eur" && secondCurr == "USD" || secondCurr == "usd" {
-		ansver = number * EURtoUSD
-	} else if firstCurr == "EUR" || firstCurr == "eur" && secondCurr == "RUB" || secondCurr == "rub" {
-		ansver = number * EURtoRUB
+func calculationCurr(number float64, firstCurr string, secondCurr string) (float64, error) {
+	if number >= 0.001 && number <= 999999999999999.0 && firstCurr != secondCurr {
+		switch {
+		case firstCurr == "RUB" && secondCurr == "EUR":
+			return number * RUBtoEUR, nil
+		case firstCurr == "RUB" && secondCurr == "USD":
+			return number * RUBtoUSD, nil
+		case firstCurr == "EUR" && secondCurr == "USD":
+			return number * EURtoUSD, nil
+		case firstCurr == "EUR" && secondCurr == "RUB":
+			return number * EURtoRUB, nil
+		case firstCurr == "USD" && secondCurr == "RUB":
+			return number * USDtoRUB, nil
+		case firstCurr == "USD" && secondCurr == "EUR":
+			return number * USDtoEUR, nil
+		}
+	} else {
+		return 0, errors.New("Введите правильные значения!")
 	}
-	return ansver
+	return 0, nil
+}
 
+func yesOrNot() bool {
+	var userChoise string
+	fmt.Println("|Хотите ли вы сделать еще расчет?(Y/N)|")
+	fmt.Scan(&userChoise)
+	if userChoise == "Y" || userChoise == "y" {
+		return true
+	}
+	return false
 }
 
 // Финализируем приложение калькулятор. Для этого:
