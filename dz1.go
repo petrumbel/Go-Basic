@@ -13,19 +13,19 @@ const RUBtoEUR = 1 / EURtoRUB
 const RUBtoUSD = 1 / USDtoRUB
 
 func main() {
+	fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+	fmt.Println("|      __Калькулятор валют__          |")
 	for {
-		fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-		fmt.Println("|      __Калькулятор валют__          |")
 		fmt.Printf("|Конвертация 1 USD в EUR = %0.3f      |\n", USDtoEUR)
 		fmt.Printf("|Конвертация 1 USD в RUB = %0.3f     |\n", USDtoRUB)
 		fmt.Printf("|Конвертация 1 EUR в RUB = %0.3f     |\n", EURtoRUB)
 		fmt.Printf("|Конвертация 1 EUR в USD = %0.3f      |\n", EURtoUSD)
 		fmt.Printf("|Конвертация 1 RUB в EUR = %0.3f      |\n", RUBtoEUR)
 		fmt.Printf("|Конвертация 1 RUB в USD = %0.3f      |\n", RUBtoUSD)
-		number, firstCurr, secondCurr := inputNumbers()
+		number, firstCurr, secondCurr, _ := inputNumbers()
 		ansver, err := calculationCurr(number, firstCurr, secondCurr)
 		if err != nil {
-			fmt.Println(errors.New("|Ошибка, введите правильные значения  |"))
+			fmt.Println(err)
 		} else {
 			fmt.Printf("|       Ваш перевод:%0.3f\n", ansver)
 		}
@@ -37,7 +37,7 @@ func main() {
 	}
 }
 
-func inputNumbers() (float64, string, string) {
+func inputNumbers() (float64, string, string, error) {
 	var number float64
 	var firstCurr string
 	var secondCurr string
@@ -48,12 +48,18 @@ func inputNumbers() (float64, string, string) {
 	fmt.Println("|Введите первую желаемую валюту       |")
 	fmt.Print("|Например RUB, USD, EUR:")
 	fmt.Scan(&firstCurr)
+	if firstCurr != "RUB" && firstCurr != "USD" && firstCurr != "EUR" {
+		return 0, "0", "0", errors.New("Введите валюту из списка")
+	}
 	fmt.Println("|                                     |")
 	fmt.Println("|Введите вторую желаемую валюту       |")
 	fmt.Print("|Например RUB, USD, EUR:")
 	fmt.Scan(&secondCurr)
+	if secondCurr != "RUB" && secondCurr != "USD" && secondCurr != "EUR" {
+		return 0, "0", "0", errors.New("Введите валюту из списка")
+	}
 	fmt.Println("|                                     |")
-	return number, firstCurr, secondCurr
+	return number, firstCurr, secondCurr, nil
 }
 
 func calculationCurr(number float64, firstCurr string, secondCurr string) (float64, error) {
