@@ -2,42 +2,36 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 func main() {
 	fmt.Println("__Калькулятор чисел__")
-	operation := inputOperation()
-	numbers := inputNumbers()
-	parseNumbers(numbers)
-	arrayNumbers, err := parseNumbers(numbers)
-	AVGAnsver := AVGOperation(arrayNumbers)
-	SUMAnsver := SUMOperation(arrayNumbers)
-	MEDAnsver := MEDOperation(arrayNumbers)
+	operation, stringNumbers := input()
+	arrayNumbers, err := parseNumbers(stringNumbers)
+	if err != nil {
+		fmt.Printf("Ошибка: %v", err)
+	}
 	choosingAnOperation(operation, arrayNumbers)
-	fmt.Printf("%v", AVGAnsver)
-	fmt.Printf("%v", err)
-	fmt.Printf("%v", SUMAnsver)
-	fmt.Printf("%v", MEDAnsver)
 
 }
 
-func inputOperation() string {
+func input() (string, string) {
 	var operation string
-	fmt.Print("Введите операцию(AVG, SUM, MED): ")
-	fmt.Scanln(&operation)
-	return operation
-}
-
-func inputNumbers() string {
 	var stringNumbers string
+
+	fmt.Print("Введите операцию(AVG, SUM, MED): ")
+	fmt.Scan(&operation)
+
 	fmt.Print("Введите числа через запятую: ")
-	fmt.Scanln(&stringNumbers)
-	return stringNumbers
+	fmt.Scan(&stringNumbers)
+
+	return operation, stringNumbers
 }
 
-func choosingAnOperation(operation string, arrayNumbers []float64) string {
+func choosingAnOperation(operation string, arrayNumbers []float64) {
 	switch operation {
 	case "AVG":
 		AVGOperation(arrayNumbers)
@@ -46,63 +40,72 @@ func choosingAnOperation(operation string, arrayNumbers []float64) string {
 	case "MED":
 		MEDOperation(arrayNumbers)
 	}
-	return operation
+
 }
 
-func parseNumbers(numbers string) ([]float64, error) {
-	parts := strings.Split(numbers, ",")
-	var arrayNumbers []float64
+func parseNumbers(stringNumbers string) ([]float64, error) {
+	parts := strings.Split(stringNumbers, ",")
+	numbers := make([]float64, 0, len(parts))
 
 	for _, part := range parts {
-		numStr := strings.TrimSpace(part)
-		if numStr == "" {
+		trimmedString := strings.TrimSpace(part)
+		if trimmedString == "" {
 			continue
 		}
-		num, err := strconv.ParseFloat(numStr, 64)
+
+		number, err := strconv.ParseFloat(trimmedString, 64)
 		if err != nil {
-			return nil, fmt.Errorf("'%s' не является числом", numStr)
+			return nil, fmt.Errorf("некорректное число: %s", trimmedString)
+
 		}
-		arrayNumbers = append(arrayNumbers, num)
+		numbers = append(numbers, number)
+
+	}
+	if len(numbers) == 0 {
+		return nil, fmt.Errorf("нет чисел для обработки")
 	}
 
-	if len(arrayNumbers) == 0 {
-		return nil, fmt.Errorf("не введено ни одного числа")
-	}
-
-	return arrayNumbers, nil
+	return numbers, nil
 }
 
-func AVGOperation(arrayNumbers []float64) float64 {
+func AVGOperation(arrayNumbers []float64) {
+	fmt.Println("Входные данные:", arrayNumbers)
 	sum := 0.0
 	for _, num := range arrayNumbers {
 		sum += num
 	}
-	return sum / float64(len(arrayNumbers))
+	avg := sum / float64(len(arrayNumbers))
 
+	fmt.Printf("AVG = %0.2f", avg)
 }
 
-func SUMOperation(arrayNumbers []float64) float64 {
+func SUMOperation(arrayNumbers []float64) {
 	sum := 0.0
 	for _, num := range arrayNumbers {
 		sum += num
-
 	}
-	return sum
+	fmt.Printf("SUM = %0.2f", sum)
 }
 
-func MEDOperation(arrayNumbers []float64) float64 {
-	sorted := make([]float64, len(arrayNumbers))
-	copy(sorted, arrayNumbers)
-	n := len(sorted)
-	for i := 0; i < n-1; i++ {
-		for j := 0; j < n-i-1; j++ {
-			if sorted[j] > sorted[j+1] {
-				sorted[j], sorted[j+1] = sorted[j+1], sorted[j]
-			}
-		}
+func MEDOperation(arrayNumbers []float64) {
+	data := make([]float64, len(arrayNumbers))
+	copy(data, arrayNumbers)
+
+	sort.Float64s(data)
+
+	n := len(data)
+	var median float64
+
+	if n == 0 {
+		fmt.Print("Нет данных для вычисления медианы")
+		return
 	}
+
 	if n%2 == 1 {
-		return sorted[n/2]
+		median = data[n/2]
+	} else {
+		median = (data[n/2-1] + data[n/2]) / 2
 	}
-	return (sorted[n/2-1] + sorted[n/2]) / 2
+
+	fmt.Printf("MED = %0.2f", median)
 }
