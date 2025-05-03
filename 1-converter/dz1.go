@@ -21,40 +21,32 @@ const (
 	maxNumber = 9999999999999999.0
 )
 
-var rateStorage *currencyMap
+var (
+	usdRates = map[string]float64{"EUR": 0.95, "RUB": 91.07}
+	eurRates = map[string]float64{"USD": 1.05, "RUB": 95.61}
+	rubRates = map[string]float64{"USD": 0.011, "EUR": 0.01}
+)
 
-type currencyMap = map[string]singleCurrMap
-type singleCurrMap = map[string]float64
-
-func init() {
-	m := make(currencyMap)
-	rateStorage = &m
-	(*rateStorage)[RUB] = make(singleCurrMap)
-	(*rateStorage)[USD] = make(singleCurrMap)
-	(*rateStorage)[EUR] = make(singleCurrMap)
-
-	(*rateStorage)[RUB][USD] = RUBtoUSD
-	(*rateStorage)[RUB][EUR] = RUBtoEUR
-	(*rateStorage)[USD][EUR] = USDtoEUR
-	(*rateStorage)[USD][RUB] = USDtoRUB
-	(*rateStorage)[EUR][RUB] = EURtoRUB
-	(*rateStorage)[EUR][USD] = EURtoUSD
-
+var currencyRates = map[string]*map[string]float64{
+	"USD": &usdRates,
+	"EUR": &eurRates,
+	"RUB": &rubRates,
 }
 
 func main() {
 	fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 	fmt.Println("       __Калькулятор валют__")
+	fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 
 	for {
-		fmt.Printf("Конвертация 1 USD в EUR = %0.3f\n", USDtoEUR)
-		fmt.Printf("Конвертация 1 USD в RUB = %0.3f\n", USDtoRUB)
-		fmt.Printf("Конвертация 1 EUR в RUB = %0.3f\n", EURtoRUB)
-		fmt.Printf("Конвертация 1 EUR в USD = %0.3f\n", EURtoUSD)
-		fmt.Printf("Конвертация 1 RUB в EUR = %0.3f\n", RUBtoEUR)
-		fmt.Printf("Конвертация 1 RUB в USD = %0.3f\n", RUBtoUSD)
+		fmt.Printf("Конвертация 1 USD в EUR = %0.3f \n", USDtoEUR)
+		fmt.Printf("Конвертация 1 USD в RUB = %0.3f \n", USDtoRUB)
+		fmt.Printf("Конвертация 1 EUR в RUB = %0.3f \n", EURtoRUB)
+		fmt.Printf("Конвертация 1 EUR в USD = %0.3f \n", EURtoUSD)
+		fmt.Printf("Конвертация 1 RUB в EUR = %0.3f \n", RUBtoEUR)
+		fmt.Printf("Конвертация 1 RUB в USD = %0.3f \n\n", RUBtoUSD)
 
-		number, firstCurr, secondCurr, _ := inputNumbers()
+		number, firstCurr, secondCurr, err := inputNumbers()
 		ansver, err := calculationCurr(number, firstCurr, secondCurr)
 		if err != nil {
 			fmt.Println(err)
@@ -78,19 +70,18 @@ func inputNumbers() (float64, string, string, error) {
 
 	fmt.Println("Введите желаемое число для перевода")
 	fmt.Print("Например 10, 200, 3000:")
-	fmt.Scan(&number)
+	fmt.Scanln(&number)
 
 	fmt.Println("Введите первую желаемую валюту")
 	fmt.Print("Например RUB, USD, EUR:")
-	fmt.Scan(&firstCurr)
-
+	fmt.Scanln(&firstCurr)
 	if firstCurr != "RUB" && firstCurr != "USD" && firstCurr != "EUR" {
 		return 0, "0", "0", errors.New("Введите валюту из списка")
 	}
 
 	fmt.Println("Введите вторую желаемую валюту")
 	fmt.Print("Например RUB, USD, EUR:")
-	fmt.Scan(&secondCurr)
+	fmt.Scanln(&secondCurr)
 	if secondCurr != "RUB" && secondCurr != "USD" && secondCurr != "EUR" {
 		return 0, "0", "0", errors.New("Введите валюту из списка")
 	}
@@ -102,7 +93,12 @@ func calculationCurr(number float64, firstCurr string, secondCurr string) (float
 		return 0, errors.New("Введите правильные значения!\n")
 	}
 
-	rate, status := (*rateStorage)[firstCurr][secondCurr]
+	rateMap := currencyRates[firstCurr]
+	if rateMap == nil {
+		return 0, errors.New("Такого курса нет в списке!")
+	}
+
+	rate, status := (*rateMap)[secondCurr]
 	if !status {
 		return 0, errors.New("Такого курса нет в списке!")
 	}
