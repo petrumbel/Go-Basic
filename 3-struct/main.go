@@ -11,24 +11,44 @@ import (
 )
 
 func main() {
-	if err := file.EnsureFileExists("data.json"); err != nil {
+	if err := ensureDataFile(); err != nil {
 		fmt.Println("Ошибка при создании файла:", err)
 		return
 	}
 
-	binList, err := storage.LoadBins()
+	binList, err := loadBins()
 	if err != nil {
-		fmt.Println("Ошибка при чтении bin:", err)
+		fmt.Println("Ошибка при загрузке bin:", err)
 		return
 	}
 
+	newBin := promptBinInput()
+	binList = append(binList, newBin)
+
+	if err := saveBinList(binList); err != nil {
+		fmt.Println("Ошибка при сохранении bin:", err)
+		return
+	}
+
+	fmt.Println("Bin успешно создан и сохранён!")
+}
+
+func ensureDataFile() error {
+	return file.EnsureFileExists("data.json")
+}
+
+func loadBins() (bins.BinList, error) {
+	return storage.LoadBins()
+}
+
+func promptBinInput() bins.Bin {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Введите ID: ")
 	id, _ := reader.ReadString('\n')
 	id = strings.TrimSpace(id)
 
-	fmt.Print("Введите логин: ")
+	fmt.Print("Введите Логин: ")
 	name, _ := reader.ReadString('\n')
 	name = strings.TrimSpace(name)
 
@@ -37,13 +57,9 @@ func main() {
 	privateInput = strings.TrimSpace(strings.ToLower(privateInput))
 	private := privateInput == "y" || privateInput == "yes"
 
-	newBin := bins.NewBin(id, name, private)
-	binList = append(binList, newBin)
+	return bins.NewBin(id, name, private)
+}
 
-	if err := storage.SaveBins(binList); err != nil {
-		fmt.Println("Ошибка при сохранении bin:", err)
-		return
-	}
-
-	fmt.Println("Bin успешно создан и сохранён!")
+func saveBinList(binList bins.BinList) error {
+	return storage.SaveBins(binList)
 }
