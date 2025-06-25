@@ -2,15 +2,32 @@ package main
 
 import (
 	"bincli/bins"
+	"bincli/config"
 	"bincli/file"
 	"bincli/storage"
 	"bufio"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Ошибка при загрузке .env файла:", err)
+		return
+	}
+
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		fmt.Println("Ошибка загрузки конфига:", err)
+		return
+	}
+	fmt.Println("Ключ из .env:", cfg.Key)
+
 	if err := ensureDataFile(); err != nil {
 		fmt.Println("Ошибка при создании файла:", err)
 		return
